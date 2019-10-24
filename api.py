@@ -74,9 +74,14 @@ Our task will be:
     * description: long desc. Text type.
     * done: task completetion state. Bool type.
 
+* Make your routes
+* Improve the interface:
+    * When returning the list of tasks you should return the URI
+    instead of the id, this makes it easier to make calls
+    client side
         
 '''
-from flask import Flask, jsonify, abort, make_response, request
+from flask import Flask, jsonify, abort, make_response, request, url_for
 
 app = Flask(__name__)
 
@@ -99,7 +104,7 @@ tasks = [
 @app.route('/todo/api/v1.0/tasks', methods=['GET'])
 def get_tasks():
         # Replying with JSON data
-        return jsonify({'tasks': tasks})
+        return jsonify({'tasks': [make_public_task(task) for task in tasks]})
 
 @app.route('/todo/api/v1.0/tasks', methods=['POST'])
 def create_task():
@@ -140,7 +145,6 @@ def update_task(task_id):
     task[0]['done'] = request.json.get('done', task[0]['done'])
     return jsonify({'task': task[0]})
 
-
 @app.route('/todo/api/v1.0/tasks/<int:task_id>', methods=['DELETE'])
 def delete_task(task_id):
     task = [task for task in tasks if task['id'] == task_id]
@@ -159,7 +163,20 @@ def not_found(error):
 def bad_request(error):
     '''Custom handler for 400, return JSON'''
     return make_response(jsonify({'error': 'Bad request'}), 400)
-    
+
+# Return URIs in task list
+def make_public_task(task):
+    '''
+    replace 'id' in task to be a URI that the client can call
+    '''
+    new_task = {}
+    for field in task:
+        if field == 'id':
+            new_task['uri'] = url_for('get_task', task_id=task['id'], _external=True)
+        else:
+            new_task[field] = task[field]
+    return new_task
+
 if __name__ == "__main__":
     app.run(debug=True)
     
