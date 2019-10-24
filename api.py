@@ -76,7 +76,7 @@ Our task will be:
 
         
 '''
-from flask import Flask, jsonify, abort, make_response
+from flask import Flask, jsonify, abort, make_response, request
 
 app = Flask(__name__)
 
@@ -101,6 +101,20 @@ tasks = [
 def get_tasks():
         # Replying with JSON data
         return jsonify({'tasks': tasks})
+
+@app.route('/todo/api/v1.0/tasks', methods=['POST'])
+def create_task():
+    # Only accept JSON data
+    if not request.json or not 'title' in request.json:
+        abort(400) # Bad request
+    task = {
+        'id': tasks[-1]['id'] + 1, # id is the last task plus one
+        'title': request.json['title'],
+        'description': request.json.get('description', ""),
+        'done': False
+    }
+    tasks.append(task)
+    return jsonify({'task': task}), 201 # 201 means Created
 
 @app.route('/todo/api/v1.0/tasks/<int:task_id>', methods=['GET'])
 def get_task(task_id):
