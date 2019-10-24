@@ -128,6 +128,11 @@ def get_task(task_id):
 def not_found(error):
     '''Custom handler for 404, return JSON'''
     return make_response(jsonify({'error': 'Not found'}), 404)
+
+@app.errorhandler(400)
+def bad_request(error):
+    '''Custom handler for 400, return JSON'''
+    return make_response(jsonify({'error': 'Bad request'}), 400)
     
 if __name__ == "__main__":
     app.run(debug=True)
