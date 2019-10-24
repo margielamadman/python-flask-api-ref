@@ -141,6 +141,14 @@ def update_task(task_id):
     return jsonify({'task': task[0]})
 
 
+@app.route('/todo/api/v1.0/tasks/<int:task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    task = [task for task in tasks if task['id'] == task_id]
+    if len(task) == 0:
+        abort(404)
+    tasks.remove(task[0])
+    return jsonify({'result': True})
+
 # This makes the error response more API friendly
 @app.errorhandler(404)
 def not_found(error):
